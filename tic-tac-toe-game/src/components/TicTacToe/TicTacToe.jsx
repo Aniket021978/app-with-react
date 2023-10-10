@@ -1,115 +1,107 @@
-import React, { useRef, useState } from 'react'
-import './TicTacToe.css'
-import circle_icon from '../Assests/circle.png'
-import cross_icon from '../Assests/cross.png'
-let data=["","","","","","","","",""];
-const TicTacToe = () => {
-  let [count,setCount]=useState(0);
-  let [lock,setLock]=useState(false);
-  let [winner, setWinner] = useState(null);
+import React, { useEffect, useRef, useState } from 'react';
+import './TicTacToe.css';
+import circle_icon from '../Assests/circle.png';
+import cross_icon from '../Assests/cross.png';
 
-  let titleRef=useRef(null);
-  let box1=useRef(null);
-  let box2=useRef(null);
-  let box3=useRef(null);
-  let box4=useRef(null);
-  let box5=useRef(null);
-  let box6=useRef(null);
-  let box7=useRef(null);
-  let box8=useRef(null);
-  let box9=useRef(null);
-  let box_arr=[box1,box2,box3,box4,box5,box6,box7,box8,box9];
-  const toggle=(e,num)=>{
-      if(lock || data[num] !== ""){
-        return 0;
+const TicTacToe = () => {
+  const [data, setData] = useState(Array(9).fill(''));
+  const [count, setCount] = useState(0);
+  const [lock, setLock] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [title, setTitle] = useState('Tic Tac Toe In <span>React</span>');
+
+  const titleRef = useRef(null);
+  const boxArr = Array(9).fill(null).map(() => useRef(null));
+
+  useEffect(() => {
+    checkWin();
+  }, [count]);
+
+  const toggle = (num) => {
+    if (lock || data[num] !== '') {
+      return;
+    }
+    const newData = [...data];
+    newData[num] = count % 2 === 0 ? 'x' : 'o';
+    setCount((prevCount) => {
+      setData(newData);
+      return prevCount + 1;
+    });
+  };
+
+  const checkWin = () => {
+    const winPatterns = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8], // rows
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8], // columns
+      [0, 4, 8],
+      [2, 4, 6], // diagonals
+    ];
+
+    for (const pattern of winPatterns) {
+      const [a, b, c] = pattern;
+      if (data[a] === data[b] && data[b] === data[c] && data[c] !== '') {
+        handleWin(data[c]);
+        return;
       }
-      if(count%2===0){
-        e.target.innerHTML =`<img src='${cross_icon}'>`;
-        data[num]="x";
-        setCount(++count);
-      }
-      else{
-        e.target.innerHTML =`<img src='${circle_icon}'>`;
-        data[num]="o";
-        setCount(++count);
-      }
-      checkwin();
-  }
-  const checkwin=()=>{
-    if(data[0]===data[1] && data[1]===data[2] && data[2]!==""){
-      win(data[2]);
     }
-    else if(data[3]===data[4] && data[4]===data[5] && data[5]!==""){
-      win(data[5]);
-    }
-    else if(data[6]===data[7] && data[7]===data[8] && data[8]!==""){
-      win(data[8]);
-    }
-    else if(data[0]===data[3] && data[3]===data[6] && data[6]!==""){
-      win(data[6]);
-    }
-    else if(data[1]===data[4] && data[4]===data[7] && data[7]!==""){
-      win(data[7]);
-    }
-    else if(data[2]===data[5] && data[5]===data[8] && data[8]!==""){
-      win(data[8]);
-    }
-    else if(data[0]===data[4] && data[4]===data[8] && data[8]!==""){
-      win(data[8]);
-    }
-    else if(data[2]===data[4] && data[4]===data[6] && data[6]!==""){
-      win(data[6]);
-    }
-    if (!data.includes('') && !winner) {
+
+    if (data.every((cell) => cell !== '') && !winner) {
       setLock(true);
-      titleRef.current.innerHTML = 'OOPS! Nobody Wins!';
+      setTitle('OOPS! Nobody Wins!');
     }
-  }
-  const win=(winner)=>{
+  };
+
+  const handleWin = (winner) => {
     setLock(true);
-    if(winner==="x"){
-      titleRef.current.innerHTML = `Congratulations: <img src=${cross_icon}> wins`;
-    }
-    else if(winner==="o"){
-      titleRef.current.innerHTML = `Congratulations: <img src=${circle_icon}> wins`;
-    }
-  }
-  const reset=()=>{
+    const message = winner === 'x' ? 'Congratulations: X wins' : 'Congratulations: O wins';
+    setTitle(message);
+    setWinner(winner);
+  };
+
+  const reset = () => {
     setLock(false);
     setWinner(null);
-    data=["","","","","","","","",""];
-    titleRef.current.innerHTML = 'Tic Tac Toe In <span>React</span>';
-    box_arr.map((e)=>{
-      e.current.innerHTML="";
-    })
-  }
-  return (
-    <div>
-      <div className="main">
-        <h1 className="title" ref={titleRef}>
-        Tic Tac Toe game in<span>React</span>
-        </h1>
-        <div className="board">
-          <div className="row1">
-            <div className="boxes" ref={box1} onClick={(e)=>{toggle(e,0)}}></div>
-            <div className="boxes" ref={box2} onClick={(e)=>{toggle(e,1)}}></div>
-            <div className="boxes" ref={box3} onClick={(e)=>{toggle(e,2)}}></div>
-          </div>
-          <div className="row2">
-            <div className="boxes" ref={box4} onClick={(e)=>{toggle(e,3)}}></div>
-            <div className="boxes" ref={box5} onClick={(e)=>{toggle(e,4)}}></div>
-            <div className="boxes" ref={box6} onClick={(e)=>{toggle(e,5)}}></div>
-          </div>
-          <div className="row3">
-            <div className="boxes" ref={box7} onClick={(e)=>{toggle(e,8)}}></div>
-            <div className="boxes" ref={box8} onClick={(e)=>{toggle(e,7)}}></div>
-            <div className="boxes" ref={box9} onClick={(e)=>{toggle(e,6)}}></div>
-          </div>
-        </div>
-        <button className="reset" onClick={()=>{reset()}}>Reset</button>
-      </div>
-    </div>
-  )
-}
+    setData(Array(9).fill(''));
+    setTitle('Tic Tac Toe In <span>React</span>');
+    // Clear innerHTML after setting the state
+    setTimeout(() => {
+      boxArr.forEach((ref) => {
+        if (ref.current) {
+          ref.current.innerHTML = '';
+        }
+      });
+    }, 0);
+  };
 
-export default TicTacToe
+  return (
+    <div className="main">
+      <h1 className="title" ref={titleRef} dangerouslySetInnerHTML={{ __html: title }} />
+      <div className="board">
+        {Array.from({ length: 3 }).map((_, rowIndex) => (
+          <div key={rowIndex} className={`row${rowIndex + 1}`}>
+            {Array.from({ length: 3 }).map((_, colIndex) => (
+              <div
+                key={colIndex}
+                className="boxes"
+                ref={boxArr[rowIndex * 3 + colIndex]}
+                onClick={() => toggle(rowIndex * 3 + colIndex)}
+              >
+                {data[rowIndex * 3 + colIndex] === 'x' && <img src={cross_icon} alt="X" />}
+                {data[rowIndex * 3 + colIndex] === 'o' && <img src={circle_icon} alt="O" />}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <button className="reset" onClick={reset}>
+        Reset
+      </button>
+    </div>
+  );
+};
+
+export default TicTacToe;
